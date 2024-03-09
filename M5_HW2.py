@@ -17,11 +17,22 @@
 """
 from typing import Callable
 
-def generator_numbers(text: str):
-    pass
+def is_float(word: str)->float:          #converting Str to Float. if STR returns None
+    try:    return float(word)
+    except: return None
 
-def sum_profit(text: str, func: Callable):
-    pass
+def generator_numbers(text: str):
+    str_list = text.split()
+    for word in str_list:
+        num = is_float(word)             #returns Float for Float or None for str
+        if num is not None:
+            yield num                    #continues from previous Float
+
+def sum_profit(text: str, func: Callable)->float:
+    total_sum=0.0
+    for num in func(text):                #summarize only Float
+        total_sum +=num
+    return total_sum
 
 def main():
     text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
