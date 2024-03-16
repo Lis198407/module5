@@ -68,7 +68,7 @@ def load_logs(file_path:Path)->list:                              #reads logs fr
                 log_list.append(log_dict)
         return log_list
     except FileNotFoundError as ex:
-        print(f"error in load_logs or no such file: {ex}")
+        print(f"error in load_logs: {ex}")
         return None
     
 
@@ -105,35 +105,27 @@ def display_log_counts(counts: dict):
     else:
         print('no data for output')
     
-def parse_input(user_input):                                                    #parse input from command prompt. 2 parameters: Path and Level
-    try:
-        file_path, arg = user_input.split(' ')
-        file_path = file_path.strip()
-        arg = arg.strip()
-        return file_path, arg
-    except Exception as ex:
-        return None, None
-
 def main():
-    print(r"""Welcome to log-reader! Enter File path to log file in format '-X:\folder\file.txt' or '..' for default
-                and Level if you want to see detailed description for log level, 
-        or press enter for default. 
-          """)
-   
-    user_input = input("Enter a command prompt: ")
-    file_path, arg = parse_input(user_input)                                #parsing command promt in format <command> <-argumument1> <-argument2>...
-    if file_path == ".." or file_path is None:                              #default Path to File if not entered
+    user_input = input(r"Welcome to log-reader! Enter File path to log file in format '-X:\folder\file.txt' or press enter for default: ")
+    
+    if  len(user_input) == 0:                                                   #Path to File if not entered
         file_path = Path("HW3_log_file.txt")
+    else:
+        try:
+            file_path = Path(user_input)
+        except Exception as ex: 
+            print(ex)
 
     logs = load_logs(file_path)                                             #Load logs into list of dictionaries
     if logs is None:
         print("Please try another file or check data structure of file")
     else:
         log_dict = count_logs_by_level(logs)    
-        if arg == None:                                                         #on default - counting logs by levels, else - detailed info by level
+        logs_level = input(r"Please enter Log Level for detailed information or press enter for default: ")
+        if len(logs_level) == 0:                                            #on default - counting logs by levels, else - detailed info by level
             display_log_counts(log_dict)
         else:
-            display_logs_by_level(logs, arg)
+            display_logs_by_level(logs, logs_level)
 
 if __name__ == "__main__":
     main()

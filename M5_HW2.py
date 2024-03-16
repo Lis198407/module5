@@ -22,8 +22,8 @@ def is_float(word: str)->float:          #converting Str to Float. if STR return
     except: return None
 
 def generator_numbers(text: str):
-    str_list = text.split()
-    for word in str_list:
+    str_list = text.split(' ')
+    for word in str_list[1:(len(str_list)-1)]:
         num = is_float(word)             #returns Float for Float or None for str
         if num is not None:
             yield num                    #continues from previous Float
