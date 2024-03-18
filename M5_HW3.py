@@ -41,20 +41,29 @@
 """
 from pathlib import Path
 from datetime import datetime
+import sys
+import re
+ 
+def load_logs(file_path:Path)->list:                                                     #reads logs from filepath to list of dictionaries
 
-def load_logs(file_path:Path)->list:                              #reads logs from filepath to list of dictionaries
-
-    def parse_log_line(line: str) -> dict:                        #for parsing log line
+    def parse_log_line(line: str) -> dict:                                               #for parsing log line
         try:
             line_list = line.split()
             line_list = [line_list[0],line_list[1],line_list[2]," ".join(line_list[3:])] #creating a list for nedeed detalization
-            log_dict = {
-                'date':        datetime.strptime(line_list[0],"%Y-%m-%d"),
-                'time':        datetime.strptime(line_list[1],"%H:%M:%S"),
-                'LOGTYPE':     line_list[2],
-                'description': line_list[3]
-            }
-            return log_dict
+            log_date = datetime.strptime(line_list[0],"%Y-%m-%d")                        #checking date or Exception
+            log_time = datetime.strptime(line_list[1],"%H:%M:%S")                        #checking time or Exception
+            pattern = '^[A-Z]+$'                                                         # pattern - only UPPERCASE words
+            match = re.match(pattern,line_list[2])
+            if bool(match):
+                log_dict = {
+                    'date':        log_date,
+                    'time':        log_time,
+                    'LOGTYPE':     line_list[2],
+                    'description': line_list[3]
+                }
+                return log_dict
+            else:
+                raise ValueError ("Error in LEVEL of logs")                              #checking log level or Exception
         except Exception as ex:
             print(f"error in parse_log_line: {ex}, line: {line}")
             return None
@@ -65,7 +74,8 @@ def load_logs(file_path:Path)->list:                              #reads logs fr
         with open(file_path, "r") as file: #, encoding="utf-8"    # reading log from file
             for line in file:
                 log_dict = parse_log_line(line)
-                log_list.append(log_dict)
+                if log_dict:
+                    log_list.append(log_dict)
         return log_list
     except FileNotFoundError as ex:
         print(f"error in load_logs: {ex}")
@@ -106,24 +116,25 @@ def display_log_counts(counts: dict):
         print('no data for output')
     
 def main():
-    user_input = input(r"Welcome to log-reader! Enter File path to log file in format '-X:\folder\file.txt' or press enter for default: ")
-    
-    if  len(user_input) == 0:                                                   #Path to File if not entered
-        file_path = Path("HW3_log_file.txt")
+    print(r"Welcome to log-reader!")
+    if len(sys.argv)>=2:                                                  #To check another file: python M5_HW3.py HW3_log_file_v2.txt
+        path_to_log = sys.argv[1]                                         #To check wrong file: python M5_HW3.py HW3_wrong_log_file.txt
+        file_path = Path(path_to_log)
     else:
-        try:
-            file_path = Path(user_input)
-        except Exception as ex: 
-            print(ex)
+        print(r"File path to log file in format 'X:\folder\file.txt' should be entered in command promt. using default path")
+        file_path = Path("HW3_log_file.txt")  #Path to File if not entered in CP
 
-    logs = load_logs(file_path)                                             #Load logs into list of dictionaries
-    if logs is None:
+    logs = load_logs(file_path)                                             #Load logs into list of dictionaries    
+    if logs is None or not file_path.is_file:
         print("Please try another file or check data structure of file")
     else:
-        log_dict = count_logs_by_level(logs)    
         logs_level = input(r"Please enter Log Level for detailed information or press enter for default: ")
         if len(logs_level) == 0:                                            #on default - counting logs by levels, else - detailed info by level
-            display_log_counts(log_dict)
+            log_dict = count_logs_by_level(logs) 
+            if log_dict:   
+                display_log_counts(log_dict)
+            else:
+                print('no data for output')
         else:
             display_logs_by_level(logs, logs_level)
 
