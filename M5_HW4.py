@@ -75,22 +75,22 @@ def input_error(func):                                                          
         match func.__name__:                                                          #for different function differenet input arguments and feedback for user 
             case "add_contact":
                 try:
-                    print(func(phone_list, name, phone))
+                   return func(phone_list, name, phone)
                 except Exception as ex:
                     print(f"Unable to add contact. Error: {ex}")
             case "change_contact":                                                    #for different function - differenet messages and bot function calls
                 try:
-                    print(func(phone_list, name, phone))
+                    return func(phone_list, name, phone)
                 except Exception as ex:
                     print(f"Unable to change contact. No such Name or mistake in data structure. Error: {ex}")
             case "show_phone":
                 try:
-                    print(func(phone_list, name))
+                    return func(phone_list, name)
                 except Exception as ex:
                     print(f"Unable to show phone number. Error: {ex}")
             case "show_all":
                 try:
-                    print(f"Your contact database: \n {func(phone_list)}")
+                    return func(phone_list)
                 except Exception as ex:
                     print(f"Unable to show all database. Error: {ex}")
             case "parse_input":
@@ -102,16 +102,16 @@ def input_error(func):                                                          
                 print("no such function")
     return inner
 
-@input_error
-def add_contact(phones_info:list,name_to_add:str,phone_to_add:str)->str:                                #adds new line: name and phone to the list of dictionaries
-    phones_info.append({"name": name_to_add, "phone": phone_to_add})
-    return "data added"
-
 def find_dictionary_by_name(phone_info:list, target_name:str):                   #finds entry in list by name
     for dictionary in phone_info:
         if "name" in dictionary and dictionary["name"] == target_name:
             return dictionary                                                     #Return dictionary with name = target_name
     return None                                                                   #Return None if the name is not found in any dictionary
+
+@input_error
+def add_contact(phones_info:list,name_to_add:str,phone_to_add:str)->str:          #adds new line: name and phone to the list of dictionaries
+    phones_info.append({"name": name_to_add, "phone": phone_to_add})
+    return "data added"
 
 @input_error
 def change_contact(phones_info:list,name_to_change:str,new_phone:str)->str:       #change phone by name
@@ -172,10 +172,10 @@ def main():
                 break
             case "hello":                   print("How can I help you? print 'help' for all commands")
             case "get from file"|"get":     phones_info = get_phones_info(file_path)
-            case "add"|"add contact":       add_contact(phones_info, args)
-            case "change contact"|"change": change_contact(phones_info, args)
-            case "show contacts"|"all":     show_all(phones_info)
-            case "show phone"|"phone":      show_phone(phones_info, args)
+            case "add"|"add contact":       print(add_contact(phones_info, args))
+            case "change contact"|"change": print(change_contact(phones_info, args))
+            case "show contacts"|"all":     print(f"Your contact database: \n {show_all(phones_info)}")
+            case "show phone"|"phone":      print(show_phone(phones_info, args))
             case "save to file"|"save":     save_to_file(phones_info,file_path)
             case "help"|"?"|"/?":
                 print("""available command of bot is:  
